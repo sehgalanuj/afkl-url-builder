@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AFKL Flight Search URL Builder</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f7f6;
+    margin: 0;
+    padding: 20px;
+    color: #333;
+    font-size: 14px;
+  }
+  .container {
+    max-width: 820px;
+    margin: auto;
+    background: #fff;
+    padding: 24px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    border-radius: 8px;
+  }
+  h2 { text-align: center; color: #0275d8; margin-bottom: 4px; font-size: 20px; }
+  .subtitle { text-align: center; color: #888; font-size: 12px; margin-bottom: 20px; }
+  .card {
+    background: #f8fafd;
+    border: 1px solid #d6e4f0;
+    border-left: 4px solid #0275d8;
+    border-radius: 6px;
+    padding: 16px;
+    margin-bottom: 14px;
+  }
+  .card h3 { margin: 0 0 12px 0; color: #0275d8; font-size: 13px; font-weight: bold; letter-spacing: 0.03em; text-transform: uppercase; }
+  .settings-row { display: flex; flex-wrap: wrap; gap: 12px; align-items: flex-end; }
+  .settings-row .field { display: flex; flex-direction: column; gap: 4px; }
+  .field-airline { flex: 0 0 auto; }
+  .field-domain  { flex: 1 1 160px; }
+  .field-cabin   { flex: 1 1 160px; }
+  .field-pax     { flex: 0 0 70px; }
+  label { font-size: 11px; color: #555; font-weight: bold; text-transform: uppercase; letter-spacing: 0.05em; }
+  select, input[type="number"], input[type="date"], input[type="time"], input[type="text"] {
+    padding: 7px 9px; border: 1px solid #ccc; border-radius: 4px; font-size: 13px;
+    font-family: Arial, sans-serif; color: #333; background: #fff; width: 100%;
+    box-sizing: border-box; transition: border-color 0.15s;
+  }
+  select:focus, input:focus { outline: none; border-color: #0275d8; box-shadow: 0 0 0 2px rgba(2,117,216,0.12); }
+  input.invalid { border-color: #c0392b !important; background: #fff8f8; }
+  .airline-toggle { display: flex; border: 1px solid #ccc; border-radius: 4px; overflow: hidden; }
+  .airline-toggle button {
+    flex: 1; padding: 7px 16px; border: none; background: #fff; color: #555;
+    font-size: 13px; font-family: Arial, sans-serif; cursor: pointer;
+    transition: background 0.15s, color 0.15s; white-space: nowrap;
+  }
+  .airline-toggle button.active { background: #0275d8; color: #fff; font-weight: bold; }
+  .airline-toggle button:not(:last-child) { border-right: 1px solid #ccc; }
+  .trip-toggle { display: flex; border: 1px solid #ccc; border-radius: 4px; overflow: hidden; margin-bottom: 14px; }
+  .trip-toggle button {
+    flex: 1; padding: 7px; border: none; background: #fff; color: #555;
+    font-size: 13px; font-family: Arial, sans-serif; cursor: pointer; transition: background 0.15s, color 0.15s;
+  }
+  .trip-toggle button.active { background: #0275d8; color: #fff; font-weight: bold; }
+  .trip-toggle button:first-child { border-right: 1px solid #ccc; }
+  .segment {
+    display: grid;
+    grid-template-columns: 70px 70px 140px 100px 110px auto;
+    gap: 8px; align-items: end; margin-bottom: 8px; padding-bottom: 8px; border-bottom: 1px solid #eaeff5;
+  }
+  .segment:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+  .segment input[type="text"].iata { text-transform: uppercase; font-weight: bold; font-size: 14px; letter-spacing: 0.06em; text-align: center; }
+  .segment input[type="text"].flight-no { text-transform: uppercase; font-family: 'Courier New', monospace; font-size: 13px; }
+  .seg-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+  .seg-count { font-size: 11px; color: #888; font-style: italic; }
+  .btn-remove { background: none; border: 1px solid #e0a0a0; color: #c0392b; border-radius: 4px; padding: 3px 9px; font-size: 11px; cursor: pointer; font-family: Arial, sans-serif; }
+  .btn-remove:hover { background: #fdf0ee; }
+  .btn-add { background: none; border: 1px solid #0275d8; color: #0275d8; border-radius: 4px; padding: 5px 14px; font-size: 12px; cursor: pointer; font-family: Arial, sans-serif; display: inline-block; }
+  .btn-add:hover { background: #e8f3fb; }
+  .trip-break { display: flex; align-items: center; gap: 10px; background: #eaf3fb; border: 1px dashed #a0c8e8; border-radius: 5px; padding: 8px 14px; margin-bottom: 14px; font-size: 12px; color: #0275d8; }
+  .trip-break .break-label { font-weight: bold; white-space: nowrap; }
+  .trip-break .break-detail { color: #555; font-size: 12px; }
+  /* URL output details */
+  .url-details { margin-bottom: 10px; }
+  .url-details summary { font-size: 12px; color: #0275d8; cursor: pointer; user-select: none; list-style: none; display: inline-flex; align-items: center; gap: 4px; }
+  .url-details summary::-webkit-details-marker { display: none; }
+  .url-details[open] summary::before  { content: "▾ "; }
+  .url-details:not([open]) summary::before { content: "▸ "; }
+  .url-box {
+    margin-top: 8px;
+    background: #fff;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-shadow: inset 0 1px 3px rgba(0,0,0,0.08);
+    padding: 10px 12px;
+    word-break: break-all;
+    font-family: 'Courier New', monospace;
+    font-size: 12px;
+    color: #333;
+    line-height: 1.7;
+  }
+  .url-decoded {
+    margin-top: 6px;
+    background: #fff;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-shadow: inset 0 1px 3px rgba(0,0,0,0.08);
+    padding: 10px 12px;
+    word-break: break-all;
+    font-family: 'Courier New', monospace;
+    font-size: 12px;
+    color: #555;
+    line-height: 1.7;
+  }
+  .url-decoded-label { font-size: 11px; color: #888; margin-top: 8px; margin-bottom: 2px; }
+  .url-ready { font-size: 12px; color: #555; margin-bottom: 8px; }
+
+  .url-actions { display: flex; gap: 10px; margin-top: 10px; }
+  .btn-primary { flex: 1; padding: 10px; border: none; background: #0275d8; color: #fff; border-radius: 4px; font-size: 13px; font-family: Arial, sans-serif; cursor: pointer; font-weight: bold; }
+  .btn-primary:hover { background: #025aa5; }
+  .btn-secondary { flex: 1; padding: 10px; border: 1px solid #0275d8; background: #fff; color: #0275d8; border-radius: 4px; font-size: 13px; font-family: Arial, sans-serif; cursor: pointer; font-weight: bold; }
+  .btn-secondary:hover { background: #e8f3fb; }
+  .btn-danger { padding: 7px 14px; border: 1px solid #e0a0a0; background: #fff; color: #c0392b; border-radius: 4px; font-size: 12px; font-family: Arial, sans-serif; cursor: pointer; }
+  .btn-danger:hover { background: #fdf0ee; }
+  .paste-details { margin-bottom: 14px; border: 1px solid #d6e4f0; border-radius: 6px; background: #f8fafd; }
+  .paste-details summary { padding: 10px 14px; font-size: 12px; font-weight: bold; color: #0275d8; cursor: pointer; user-select: none; letter-spacing: 0.03em; list-style: none; }
+  .paste-details summary::-webkit-details-marker { display: none; }
+  .paste-details[open] summary { border-bottom: 1px solid #d6e4f0; }
+  .paste-details[open] summary::before { content: "▾  "; }
+  .paste-details:not([open]) summary::before { content: "▸  "; }
+  .paste-body { padding: 12px 14px; }
+  .disclaimer { font-size: 11px; text-align: center; margin-top: 20px; color: #aaa; }
+  @media (max-width: 640px) {
+    .segment { grid-template-columns: 1fr 1fr 1fr; grid-template-rows: auto auto; }
+    .segment .col-from { grid-column: 1; } .segment .col-to { grid-column: 2; } .segment .col-flight { grid-column: 3; }
+    .segment .col-date { grid-column: 1; } .segment .col-time { grid-column: 2; } .segment .col-del { grid-column: 3; align-self: end; }
+    .settings-row { flex-direction: column; } .field-domain, .field-cabin { flex: 1 1 100%; }
+  }
+  @media (max-width: 400px) {
+    .segment { grid-template-columns: 1fr 1fr; }
+    .url-actions { flex-direction: column; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <h2>AFKL Flight Search URL Builder</h2>
+  <p class="subtitle">Build deep-link search URLs for KLM and Air France metasearch</p>
+
+  <!-- Settings -->
+  <div class="card">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+      <h3 style="margin:0;">Settings</h3>
+      <button class="btn-danger" onclick="resetAll()">&#8635; Reset</button>
+    </div>
+    <div class="settings-row">
+      <div class="field field-airline">
+        <label>Airline</label>
+        <div class="airline-toggle">
+          <button id="btn-af" class="active" onclick="setAirline('airfrance')">Air France</button>
+          <button id="btn-klm" onclick="setAirline('klm')">KLM</button>
+        </div>
+      </div>
+      <div class="field field-domain">
+        <label>Website</label>
+        <select id="domain" onchange="renderURL()"></select>
+      </div>
+      <div class="field field-cabin">
+        <label>Cabin Class</label>
+        <select id="cabin" onchange="renderURL()">
+          <option value="BUSINESS">Business</option>
+          <option value="ECONOMY">Economy</option>
+          <option value="PREMIUM_ECONOMY">Premium Economy</option>
+          <option value="FIRST">First Class</option>
+        </select>
+      </div>
+      <div class="field field-pax">
+        <label>Pax</label>
+        <input type="number" id="pax" min="1" max="9" value="1" oninput="renderURL()" style="width:70px;" />
+      </div>
+    </div>
+  </div>
+
+  <!-- Paste Itinerary (collapsible) -->
+  <details class="paste-details">
+    <summary>Paste itinerary</summary>
+    <div class="paste-body">
+      <p style="font-size:12px;color:#666;margin:0 0 6px;">One segment per line: <code>FROM TO YYYY-MM-DD HH:MM FLIGHT</code> &nbsp;&middot;&nbsp; Use <code>---</code> on its own line to separate outbound from return.</p>
+      <p style="font-size:12px;color:#999;margin:0 0 10px;">Example:<br>
+        <code>GVA AMS 2026-09-11 11:55 KL1932</code><br>
+        <code>AMS SLC 2026-09-11 17:30 KL0609</code><br>
+        <code>SLC LGB 2026-09-11 20:45 KL7127</code><br>
+        <code>---</code><br>
+        <code>FLL JFK 2026-09-19 15:20 DL0305</code><br>
+        <code>JFK ZRH 2026-09-19 20:45 DL0052</code>
+      </p>
+      <textarea id="paste-input" rows="6" placeholder="Paste your itinerary here&#8230;" style="width:100%;box-sizing:border-box;font-family:'Courier New',monospace;font-size:12px;padding:8px;border:1px solid #ccc;border-radius:4px;resize:vertical;color:#333;"></textarea>
+      <div style="display:flex;gap:10px;margin-top:8px;">
+        <button class="btn-primary" onclick="parseItinerary()" style="flex:1;">Load Itinerary</button>
+        <button class="btn-secondary" onclick="clearPaste()" style="flex:0 0 auto;padding:10px 18px;">Clear</button>
+      </div>
+      <div id="paste-error" style="display:none;margin-top:8px;font-size:12px;color:#c0392b;background:#fdf0ee;border:1px solid #e0a0a0;border-radius:4px;padding:7px 10px;"></div>
+    </div>
+  </details>
+
+  <!-- Trip Type -->
+  <div class="trip-toggle">
+    <button id="btn-oneway" onclick="setTripType('oneway')">&#8599; One Way</button>
+    <button id="btn-return" class="active" onclick="setTripType('return')">&#8644; With Return</button>
+  </div>
+
+  <!-- Outbound -->
+  <div class="card" id="outbound-card">
+    <div class="seg-header">
+      <div>
+        <h3 style="margin:0 0 2px;">&#8599; Outbound Segments</h3>
+        <span class="seg-count" id="out-count"></span>
+      </div>
+      <button class="btn-add" onclick="addSeg('out')">+ Add Segment</button>
+    </div>
+    <div id="out-segs"></div>
+  </div>
+
+  <!-- Trip Break -->
+  <div class="trip-break" id="trip-break" style="display:none;">
+    <span class="break-label">&#9992; Trip Break:</span>
+    <span class="break-detail" id="break-detail">&#8212;</span>
+  </div>
+
+  <!-- Return -->
+  <div class="card" id="return-card" style="display:none;">
+    <div class="seg-header">
+      <div>
+        <h3 style="margin:0 0 2px;">&#8601; Return Segments</h3>
+        <span class="seg-count" id="ret-count"></span>
+      </div>
+      <button class="btn-add" onclick="addSeg('ret')">+ Add Segment</button>
+    </div>
+    <div id="ret-segs"></div>
+  </div>
+
+  <!-- URL Output -->
+  <div class="card" style="border-left-color: #0a6ebd;">
+    <h3>Generated URL</h3>
+    <p class="url-ready" id="url-status">Fill in flight details above, then copy or open the URL.</p>
+    <div class="url-actions" id="url-actions">
+      <button class="btn-secondary" id="copy-btn" onclick="copyURL()">&#128203; Copy URL</button>
+      <button class="btn-primary" onclick="openURL()">Open in Browser &#8599;</button>
+    </div>
+    <div id="url-expandable" style="display:none;">
+      <details class="url-details" id="url-details">
+        <summary>Show URL</summary>
+        <div class="url-box" id="url-display"></div>
+        <div id="decoded-section" style="display:none;">
+          <div class="url-decoded-label">Decoded (human-readable):</div>
+          <div class="url-decoded" id="url-decoded"></div>
+        </div>
+      </details>
+      <label style="font-size:11px;color:#888;display:inline-flex;align-items:center;gap:5px;margin-top:6px;cursor:pointer;text-transform:none;letter-spacing:0;font-weight:normal;">
+        <input type="checkbox" id="show-decoded" onchange="toggleDecoded()" style="width:auto;margin:0;" />
+        Also show decoded URL
+      </label>
+
+    </div>
+  </div>
+
+  <div class="disclaimer">
+    This tool is for informational purposes. Always verify fares and availability on the airline's website.
+  </div>
+</div>
+
+<script>
+  const DOMAINS = {
+    airfrance: ['fr','de','nl','ie','co.uk','us','co.in'],
+    klm:       ['nl','de','fr','ie','co.uk','us','co.in'],
+  };
+  let airline     = 'airfrance';
+  let tripType    = 'return';
+  let outSegs     = [];
+  let retSegs     = [];
+  let segId       = 0;
+  let showDecoded = false;
+
+  function mkSeg(defaults) {
+    return Object.assign({ id: ++segId, from:'', to:'', date:'', time:'', flight:'' }, defaults || {});
+  }
+
+  function init() {
+    outSegs = [mkSeg()];
+    retSegs = [mkSeg()];
+    setAirline('airfrance');
+    setTripType('return');
+    renderAll();
+  }
+
+  function resetAll() {
+    segId = 0;
+    outSegs = [mkSeg()];
+    retSegs = [mkSeg()];
+    showDecoded = false;
+    document.getElementById('cabin').value = 'BUSINESS';
+    document.getElementById('pax').value   = 1;
+    document.getElementById('paste-input').value = '';
+    document.getElementById('paste-error').style.display = 'none';
+    setAirline('airfrance');
+    setTripType('return');
+    renderAll();
+
+  }
+
+  function setAirline(a) {
+    airline = a;
+    document.getElementById('btn-af').className  = a === 'airfrance' ? 'active' : '';
+    document.getElementById('btn-klm').className = a === 'klm'       ? 'active' : '';
+    const sel  = document.getElementById('domain');
+    const prev = sel.value;
+    sel.innerHTML = DOMAINS[a].map(d => {
+      const label = a === 'klm' ? 'klm.' + d : 'airfrance.' + d;
+      return '<option value="' + d + '">' + label + '</option>';
+    }).join('');
+    if ([...sel.options].some(o => o.value === prev)) sel.value = prev;
+    renderURL();
+  }
+
+  function setTripType(t) {
+    tripType = t;
+    document.getElementById('btn-oneway').className = t === 'oneway' ? 'active' : '';
+    document.getElementById('btn-return').className = t === 'return' ? 'active' : '';
+    document.getElementById('return-card').style.display = t === 'return' ? '' : 'none';
+    document.getElementById('trip-break').style.display  = t === 'return' ? '' : 'none';
+    renderURL();
+  }
+
+  function addSeg(leg) {
+    const arr  = leg === 'out' ? outSegs : retSegs;
+    const prev = arr[arr.length - 1];
+    const ns   = mkSeg({ from: prev.to || '', date: prev.date || '' });
+    if (leg === 'out') outSegs.push(ns);
+    else               retSegs.push(ns);
+    renderSegs(leg);
+    renderURL();
+    // Focus TO if FROM was auto-filled, else FROM
+    const fromEl = document.querySelector('#seg-' + ns.id + ' .iata');
+    const toEl   = document.querySelectorAll('#seg-' + ns.id + ' .iata')[1];
+    if (fromEl && toEl) (ns.from ? toEl : fromEl).focus();
+  }
+
+  function delSeg(leg, id) {
+    if (leg === 'out') { if (outSegs.length < 2) return; outSegs = outSegs.filter(s => s.id !== id); }
+    else               { if (retSegs.length < 2) return; retSegs = retSegs.filter(s => s.id !== id); }
+    renderSegs(leg);
+    renderURL();
+  }
+
+  function updateSeg(leg, id, field, val) {
+    const arr = leg === 'out' ? outSegs : retSegs;
+    const s   = arr.find(s => s.id === id);
+    if (s) s[field] = val;
+    renderURL();
+    if (field === 'to' || field === 'from') updateBreak();
+  }
+
+  function handleSegKey(e, leg, id, field) {
+    if (e.key !== 'Enter' || field !== 'flight') return;
+    const arr = leg === 'out' ? outSegs : retSegs;
+    if (arr[arr.length - 1].id === id) { e.preventDefault(); addSeg(leg); }
+  }
+
+  function updateCounts() {
+    var oc = document.getElementById('out-count');
+    var rc = document.getElementById('ret-count');
+    if (oc) oc.textContent = outSegs.length === 1 ? '1 segment' : outSegs.length + ' segments';
+    if (rc) rc.textContent = retSegs.length === 1 ? '1 segment' : retSegs.length + ' segments';
+  }
+
+  function renderSegs(leg) {
+    const arr = leg === 'out' ? outSegs : retSegs;
+    const el  = document.getElementById(leg === 'out' ? 'out-segs' : 'ret-segs');
+    el.innerHTML = arr.map(function(s, i) {
+      var lv = i === 0;
+      var lbl = function(t) { return lv ? '<label>' + t + '</label>' : '<label style="visibility:hidden">.</label>'; };
+      var flightLbl = lv
+        ? '<label>Flight No. <span style="font-weight:normal;color:#bbb;font-size:10px;">e.g. KL1932, AF1</span></label>'
+        : '<label style="visibility:hidden">.</label>';
+      var removeBtn = arr.length > 1
+        ? '<button class="btn-remove" onclick="delSeg(\'' + leg + '\',' + s.id + ')"' + (lv ? ' style="margin-top:19px;"' : '') + '>&#10005;</button>'
+        : '<span></span>';
+      return '<div class="segment" id="seg-' + s.id + '">' +
+        '<div class="col-from">' + lbl('From') +
+          '<input class="iata" type="text" maxlength="4" placeholder="AMS" value="' + s.from + '"' +
+          ' oninput="this.value=this.value.toUpperCase();updateSeg(\'' + leg + '\',' + s.id + ',\'from\',this.value);this.classList.remove(\'invalid\');"' +
+          ' onkeydown="handleSegKey(event,\'' + leg + '\',' + s.id + ',\'from\')" /></div>' +
+        '<div class="col-to">' + lbl('To') +
+          '<input class="iata" type="text" maxlength="4" placeholder="CDG" value="' + s.to + '"' +
+          ' oninput="this.value=this.value.toUpperCase();updateSeg(\'' + leg + '\',' + s.id + ',\'to\',this.value);this.classList.remove(\'invalid\');"' +
+          ' onkeydown="handleSegKey(event,\'' + leg + '\',' + s.id + ',\'to\')" /></div>' +
+        '<div class="col-date">' + lbl('Date') +
+          '<input type="date" value="' + s.date + '"' +
+          ' oninput="updateSeg(\'' + leg + '\',' + s.id + ',\'date\',this.value);this.classList.remove(\'invalid\');"' +
+          ' onkeydown="handleSegKey(event,\'' + leg + '\',' + s.id + ',\'date\')" /></div>' +
+        '<div class="col-time">' + lbl('Dep. Time') +
+          '<input type="time" value="' + s.time + '"' +
+          ' oninput="updateSeg(\'' + leg + '\',' + s.id + ',\'time\',this.value);this.classList.remove(\'invalid\');"' +
+          ' onkeydown="handleSegKey(event,\'' + leg + '\',' + s.id + ',\'time\')" /></div>' +
+        '<div class="col-flight">' + flightLbl +
+          '<input class="flight-no" type="text" maxlength="8" placeholder="AF1341" value="' + s.flight + '"' +
+          ' oninput="this.value=this.value.toUpperCase();updateSeg(\'' + leg + '\',' + s.id + ',\'flight\',this.value);this.classList.remove(\'invalid\');"' +
+          ' onblur="var p=padFlight(this.value);if(p!==this.value){this.value=p;updateSeg(\'' + leg + '\',' + s.id + ',\'flight\',p);}"' +
+          ' onkeydown="handleSegKey(event,\'' + leg + '\',' + s.id + ',\'flight\')" /></div>' +
+        '<div class="col-del" style="display:flex;align-items:flex-end;">' + (lv ? '<label style="visibility:hidden">.</label>' : '') + removeBtn + '</div>' +
+        '</div>';
+    }).join('');
+    updateBreak();
+    updateCounts();
+  }
+
+  function updateBreak() {
+    if (tripType !== 'return') return;
+    var lastOut  = outSegs[outSegs.length - 1];
+    var firstRet = retSegs[0];
+    var from = ((lastOut  && lastOut.to)   || '').toUpperCase().trim();
+    var to   = ((firstRet && firstRet.from)|| '').toUpperCase().trim();
+    var el   = document.getElementById('break-detail');
+    if (!from && !to)             el.textContent = 'Enter airport codes above to see break details';
+    else if (from === to && from) el.textContent = 'Staying in ' + from + ' \u2014 same-city break (encoded as ' + from + ':A-' + from + ':A)';
+    else if (from && to)          el.textContent = 'Open jaw \u2014 arriving ' + from + ', departing ' + to + ' (encoded as ' + from + ':A-' + to + ':A)';
+    else                          el.textContent = 'Enter airport codes above';
+  }
+
+  function padFlight(f) {
+    var m = f.toUpperCase().trim().match(/^([A-Z]{1,3})(\d+)$/);
+    if (!m) return f.toUpperCase().trim();
+    return m[1] + m[2].padStart(4, '0');
+  }
+
+  function buildURL() {
+    var fd = function(d) { return d.replace(/-/g, ''); };
+    var ft = function(t) { return (t || '').replace(':', ''); };
+    var uc = function(s) { return (s || '').toUpperCase().trim(); };
+    var ov = outSegs.filter(function(s) { return s.from && s.date && s.time && s.flight; });
+    if (!ov.length) return '';
+    var cabin  = document.getElementById('cabin').value;
+    var pax    = Math.max(1, parseInt(document.getElementById('pax').value) || 1);
+    var domain = document.getElementById('domain').value;
+    var parts  = [];
+    ov.forEach(function(s) {
+      parts.push(uc(s.from) + ':A:' + fd(s.date) + '@' + ft(s.time) + ':' + padFlight(s.flight) + ':X:ZZZ:' + cabin);
+    });
+    if (tripType === 'return') {
+      var rv = retSegs.filter(function(s) { return s.from && s.date && s.time && s.flight; });
+      if (rv.length) {
+        var lastTo   = uc(ov[ov.length-1].to) || uc(rv[0].from);
+        var firstRet = rv[0];
+        parts.push(lastTo + ':A-' + uc(firstRet.from) + ':A:' + fd(firstRet.date) + '@' + ft(firstRet.time) + ':' + padFlight(firstRet.flight) + ':X:ZZZ:' + cabin);
+        rv.slice(1).forEach(function(s) {
+          parts.push(uc(s.from) + ':A:' + fd(s.date) + '@' + ft(s.time) + ':' + padFlight(s.flight) + ':X:ZZZ:' + cabin);
+        });
+        var lr = rv[rv.length-1];
+        if (lr.to) parts.push(uc(lr.to) + ':A');
+      } else {
+        var lo = ov[ov.length-1];
+        if (lo.to) parts.push(uc(lo.to) + ':A');
+      }
+    } else {
+      var lo2 = ov[ov.length-1];
+      if (lo2.to) parts.push(uc(lo2.to) + ':A');
+    }
+    var conn = parts.join('%3E');
+    var base = airline === 'klm'
+      ? 'https://www.klm.' + domain + '/search/landing/metasearch'
+      : 'https://www.airfrance.' + domain + '/search/landing/metasearch';
+    return base + '?tp=1000&connections=' + conn + '&pax=' + pax + ':0:0:0&cabinClass=' + cabin;
+  }
+
+  function toggleDecoded() {
+    var show = document.getElementById('show-decoded').checked;
+    var sec  = document.getElementById('decoded-section');
+    var dec  = document.getElementById('url-decoded');
+    sec.style.display = show ? '' : 'none';
+    if (show) dec.textContent = decodeURIComponent(buildURL() || '');
+  }
+
+  function renderURL() {
+    var url  = buildURL();
+    var box  = document.getElementById('url-display');
+    var exp  = document.getElementById('url-expandable');
+    var stat = document.getElementById('url-status');
+    if (url) {
+      box.textContent     = url;
+      exp.style.display   = '';
+      stat.textContent    = 'URL ready — copy it or open directly in your browser.';
+      stat.style.color    = '#2a6a2a';
+      // keep decoded in sync if visible
+      if (document.getElementById('show-decoded').checked) {
+        document.getElementById('url-decoded').textContent = decodeURIComponent(url);
+      }
+
+    } else {
+      exp.style.display   = 'none';
+      stat.textContent    = 'Fill in flight details above, then copy or open the URL.';
+      stat.style.color    = '#555';
+    }
+    updateBreak();
+  }
+
+  function renderAll() {
+    renderSegs('out');
+    renderSegs('ret');
+    renderURL();
+  }
+
+  function copyURL() {
+    var url = buildURL();
+    if (!url) return;
+    navigator.clipboard.writeText(url).then(function() {
+      var btn = document.getElementById('copy-btn');
+      btn.textContent = '\u2713 Copied!';
+      setTimeout(function() { btn.textContent = '\uD83D\uDCCB Copy URL'; }, 2000);
+    }).catch(function() { prompt('Copy this URL:', url); });
+  }
+
+  function openURL() {
+    var url = buildURL();
+    if (url) window.open(url, '_blank');
+  }
+
+
+
+  function parseItinerary() {
+    var raw   = document.getElementById('paste-input').value.trim();
+    var errEl = document.getElementById('paste-error');
+    errEl.style.display = 'none';
+    if (!raw) { showPasteError('Nothing to parse \u2014 paste your itinerary above.'); return; }
+    var lines    = raw.split('\n').map(function(l) { return l.trim(); }).filter(function(l) { return l.length > 0; });
+    var breakIdx = lines.findIndex(function(l) { return l === '---'; });
+    var outLines = breakIdx === -1 ? lines : lines.slice(0, breakIdx);
+    var retLines = breakIdx === -1 ? []    : lines.slice(breakIdx + 1);
+    var parsed   = { out: [], ret: [] };
+    var errors   = [];
+    var parseLine = function(line, idx) {
+      var parts = line.split(/\s+/);
+      if (parts.length < 5) { errors.push('Line ' + (idx+1) + ': expected FROM TO DATE TIME FLIGHT, got: "' + line + '"'); return null; }
+      var from = parts[0], to = parts[1], date = parts[2], time = parts[3], flight = parts[4];
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) { errors.push('Line ' + (idx+1) + ': date "' + date + '" should be YYYY-MM-DD'); return null; }
+      if (!/^\d{2}:\d{2}$/.test(time))        { errors.push('Line ' + (idx+1) + ': time "' + time + '" should be HH:MM'); return null; }
+      return { id: ++segId, from: from.toUpperCase(), to: to.toUpperCase(), date: date, time: time, flight: padFlight(flight) };
+    };
+    outLines.forEach(function(l, i) { var s = parseLine(l, i);                       if (s) parsed.out.push(s); });
+    retLines.forEach(function(l, i) { var s = parseLine(l, i + outLines.length + 1); if (s) parsed.ret.push(s); });
+    if (errors.length)      { showPasteError(errors.join('<br>')); return; }
+    if (!parsed.out.length) { showPasteError('No valid outbound segments found.'); return; }
+    outSegs = parsed.out;
+    retSegs = parsed.ret.length ? parsed.ret : [mkSeg()];
+    setTripType(parsed.ret.length ? 'return' : 'oneway');
+    renderAll();
+    document.querySelector('.paste-details').removeAttribute('open');
+  }
+
+  function clearPaste() {
+    document.getElementById('paste-input').value = '';
+    document.getElementById('paste-error').style.display = 'none';
+  }
+
+  function showPasteError(msg) {
+    var el = document.getElementById('paste-error');
+    el.innerHTML = msg;
+    el.style.display = 'block';
+  }
+
+  init();
+</script>
+</body>
+</html>
