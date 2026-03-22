@@ -127,7 +127,17 @@
   .paste-details[open] summary::before { content: "▾  "; }
   .paste-details:not([open]) summary::before { content: "▸  "; }
   .paste-body { padding: 12px 14px; }
-  .disclaimer { font-size: 11px; text-align: center; margin-top: 20px; color: #aaa; }
+  .disclaimer {
+    font-size: 11px;
+    text-align: left;
+    margin-top: 20px;
+    color: #666;
+    line-height: 1.4;
+    padding: 12px;
+    background: #f9f9f9;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+  }
   @media (max-width: 640px) {
     .segment { grid-template-columns: 1fr 1fr 1fr; grid-template-rows: auto auto; }
     .segment .col-from { grid-column: 1; } .segment .col-to { grid-column: 2; } .segment .col-flight { grid-column: 3; }
@@ -137,6 +147,23 @@
   @media (max-width: 400px) {
     .segment { grid-template-columns: 1fr 1fr; }
     .url-actions { flex-direction: column; }
+  }
+
+  input[type="time"] {
+    /* Force 24-hour time format */
+    -webkit-appearance: textfield;
+  }
+  input[type="time"]::-webkit-calendar-picker-indicator {
+    background: transparent;
+    bottom: 0;
+    color: transparent;
+    cursor: pointer;
+    height: auto;
+    left: 0;
+    position: absolute;
+    right: 0;
+    top: 0;
+    width: auto;
   }
 </style>
 </head>
@@ -263,7 +290,11 @@
   </div>
 
   <div class="disclaimer">
-    This tool is for informational purposes. Always verify fares and availability on the airline's website.
+    <strong>Disclaimer:</strong> This tool is not affiliated with Air France, KLM, or any airline. It's an unofficial utility that generates search URLs using publicly available URL formats.
+    <br><br>
+    <strong>Important:</strong> Always verify flights, prices, and availability directly with the airline. URL formats may change without notice, potentially breaking generated links. This tool shows search results only — final bookings must be made through official airline channels. Flight information, prices, and schedules change constantly. No personal data is collected — this tool runs entirely in your browser.
+    <br><br>
+    <strong>Legal:</strong> This tool is provided "as-is" without warranties. Use at your own risk. We are not responsible for any booking issues, missed flights, price differences, or other travel-related problems that may arise from using this tool.
   </div>
 </div>
 
@@ -397,7 +428,7 @@
           ' oninput="updateSeg(\'' + leg + '\',' + s.id + ',\'date\',this.value);this.classList.remove(\'invalid\');"' +
           ' onkeydown="handleSegKey(event,\'' + leg + '\',' + s.id + ',\'date\')" /></div>' +
         '<div class="col-time">' + lbl('Dep. Time') +
-          '<input type="time" value="' + s.time + '"' +
+          '<input type="time" value="' + s.time + '" step="60"' +
           ' oninput="updateSeg(\'' + leg + '\',' + s.id + ',\'time\',this.value);this.classList.remove(\'invalid\');"' +
           ' onkeydown="handleSegKey(event,\'' + leg + '\',' + s.id + ',\'time\')" /></div>' +
         '<div class="col-flight">' + flightLbl +
@@ -566,6 +597,7 @@
   }
 
   init();
+
 </script>
 </body>
 </html>
