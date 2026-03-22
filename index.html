@@ -39,7 +39,7 @@
   .field-cabin   { flex: 1 1 160px; }
   .field-pax     { flex: 0 0 70px; }
   label { font-size: 11px; color: #555; font-weight: bold; text-transform: uppercase; letter-spacing: 0.05em; }
-  select, input[type="number"], input[type="date"], input[type="time"], input[type="text"] {
+  select, input[type="number"], input[type="text"] {
     padding: 7px 9px; border: 1px solid #ccc; border-radius: 4px; font-size: 13px;
     font-family: Arial, sans-serif; color: #333; background: #fff; width: 100%;
     box-sizing: border-box; transition: border-color 0.15s;
@@ -138,32 +138,288 @@
     border: 1px solid #ddd;
     border-radius: 6px;
   }
+
+  /* =========================================
+     CUSTOM DATE PICKER
+     ========================================= */
+  .cp-date-wrap {
+    position: relative;
+    display: flex;
+    align-items: stretch;
+    width: 100%;
+  }
+  .cp-date-wrap input.cp-date-input {
+    flex: 1;
+    padding: 7px 9px;
+    padding-right: 32px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 13px;
+    font-family: 'Courier New', monospace;
+    color: #333;
+    background: #fff;
+    width: 100%;
+    box-sizing: border-box;
+    transition: border-color 0.15s;
+    letter-spacing: 0.02em;
+  }
+  .cp-date-wrap input.cp-date-input:focus {
+    outline: none;
+    border-color: #0275d8;
+    box-shadow: 0 0 0 2px rgba(2,117,216,0.12);
+  }
+  .cp-date-wrap input.cp-date-input.invalid {
+    border-color: #c0392b !important;
+    background: #fff8f8;
+  }
+  .cp-date-wrap input.cp-date-input::placeholder {
+    color: #bbb;
+    font-family: Arial, sans-serif;
+    letter-spacing: 0;
+  }
+  .cp-date-btn {
+    position: absolute;
+    right: 1px;
+    top: 1px;
+    bottom: 1px;
+    width: 30px;
+    background: none;
+    border: none;
+    border-left: 1px solid #e0e0e0;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 15px;
+    color: #888;
+    border-radius: 0 3px 3px 0;
+    transition: background 0.12s, color 0.12s;
+    padding: 0;
+  }
+  .cp-date-btn:hover {
+    background: #f0f6ff;
+    color: #0275d8;
+  }
+
+  /* Calendar dropdown */
+  .cp-cal {
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0;
+    z-index: 1000;
+    background: #fff;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+    padding: 10px;
+    width: 252px;
+    display: none;
+    user-select: none;
+  }
+  .cp-cal.open { display: block; }
+  .cp-cal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+  }
+  .cp-cal-header button {
+    background: none;
+    border: 1px solid #ddd;
+    border-radius: 3px;
+    width: 28px;
+    height: 28px;
+    cursor: pointer;
+    font-size: 14px;
+    color: #555;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.1s;
+    padding: 0;
+    font-family: Arial, sans-serif;
+  }
+  .cp-cal-header button:hover { background: #f0f6ff; color: #0275d8; }
+  .cp-cal-title {
+    font-size: 13px;
+    font-weight: bold;
+    color: #333;
+  }
+  .cp-cal-dow {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 0;
+    margin-bottom: 2px;
+  }
+  .cp-cal-dow span {
+    text-align: center;
+    font-size: 10px;
+    font-weight: bold;
+    color: #999;
+    padding: 4px 0;
+    text-transform: uppercase;
+  }
+  .cp-cal-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 2px;
+  }
+  .cp-cal-grid button {
+    background: none;
+    border: none;
+    border-radius: 4px;
+    width: 100%;
+    aspect-ratio: 1;
+    cursor: pointer;
+    font-size: 12px;
+    font-family: Arial, sans-serif;
+    color: #333;
+    transition: background 0.1s, color 0.1s;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .cp-cal-grid button:hover { background: #e8f3fb; color: #0275d8; }
+  .cp-cal-grid button.today { font-weight: bold; box-shadow: inset 0 0 0 1px #0275d8; color: #0275d8; }
+  .cp-cal-grid button.selected { background: #0275d8; color: #fff; font-weight: bold; }
+  .cp-cal-grid button.other-month { color: #ccc; }
+  .cp-cal-grid button.other-month:hover { color: #999; background: #f8f8f8; }
+
+  /* =========================================
+     CUSTOM TIME PICKER
+     ========================================= */
+  .cp-time-wrap {
+    position: relative;
+    display: flex;
+    align-items: stretch;
+    width: 100%;
+  }
+  .cp-time-wrap input.cp-time-input {
+    flex: 1;
+    padding: 7px 9px;
+    padding-right: 32px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 13px;
+    font-family: 'Courier New', monospace;
+    color: #333;
+    background: #fff;
+    width: 100%;
+    box-sizing: border-box;
+    transition: border-color 0.15s;
+    letter-spacing: 0.02em;
+  }
+  .cp-time-wrap input.cp-time-input:focus {
+    outline: none;
+    border-color: #0275d8;
+    box-shadow: 0 0 0 2px rgba(2,117,216,0.12);
+  }
+  .cp-time-wrap input.cp-time-input.invalid {
+    border-color: #c0392b !important;
+    background: #fff8f8;
+  }
+  .cp-time-wrap input.cp-time-input::placeholder {
+    color: #bbb;
+    font-family: Arial, sans-serif;
+    letter-spacing: 0;
+  }
+  .cp-time-btn {
+    position: absolute;
+    right: 1px;
+    top: 1px;
+    bottom: 1px;
+    width: 30px;
+    background: none;
+    border: none;
+    border-left: 1px solid #e0e0e0;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 15px;
+    color: #888;
+    border-radius: 0 3px 3px 0;
+    transition: background 0.12s, color 0.12s;
+    padding: 0;
+  }
+  .cp-time-btn:hover {
+    background: #f0f6ff;
+    color: #0275d8;
+  }
+
+  /* Time dropdown */
+  .cp-time-drop {
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0;
+    z-index: 1000;
+    background: #fff;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+    padding: 8px;
+    display: none;
+    user-select: none;
+    width: 180px;
+  }
+  .cp-time-drop.open { display: block; }
+  .cp-time-drop-header {
+    display: flex;
+    gap: 4px;
+    margin-bottom: 6px;
+  }
+  .cp-time-drop-header span {
+    flex: 1;
+    text-align: center;
+    font-size: 10px;
+    font-weight: bold;
+    color: #999;
+    text-transform: uppercase;
+  }
+  .cp-time-cols {
+    display: flex;
+    gap: 4px;
+    height: 180px;
+  }
+  .cp-time-col {
+    flex: 1;
+    overflow-y: auto;
+    border: 1px solid #eee;
+    border-radius: 4px;
+    scrollbar-width: thin;
+    scrollbar-color: #ccc #f8f8f8;
+  }
+  .cp-time-col::-webkit-scrollbar { width: 5px; }
+  .cp-time-col::-webkit-scrollbar-track { background: #f8f8f8; }
+  .cp-time-col::-webkit-scrollbar-thumb { background: #ccc; border-radius: 3px; }
+  .cp-time-col button {
+    display: block;
+    width: 100%;
+    padding: 6px 4px;
+    border: none;
+    background: none;
+    font-size: 13px;
+    font-family: 'Courier New', monospace;
+    color: #333;
+    cursor: pointer;
+    text-align: center;
+    transition: background 0.1s;
+    border-radius: 0;
+  }
+  .cp-time-col button:hover { background: #e8f3fb; color: #0275d8; }
+  .cp-time-col button.selected { background: #0275d8; color: #fff; font-weight: bold; }
+
   @media (max-width: 640px) {
     .segment { grid-template-columns: 1fr 1fr 1fr; grid-template-rows: auto auto; }
     .segment .col-from { grid-column: 1; } .segment .col-to { grid-column: 2; } .segment .col-flight { grid-column: 3; }
     .segment .col-date { grid-column: 1; } .segment .col-time { grid-column: 2; } .segment .col-del { grid-column: 3; align-self: end; }
     .settings-row { flex-direction: column; } .field-domain, .field-cabin { flex: 1 1 100%; }
+    .cp-cal { left: auto; right: 0; }
   }
   @media (max-width: 400px) {
     .segment { grid-template-columns: 1fr 1fr; }
     .url-actions { flex-direction: column; }
-  }
-
-  input[type="time"] {
-    /* Force 24-hour time format */
-    -webkit-appearance: textfield;
-  }
-  input[type="time"]::-webkit-calendar-picker-indicator {
-    background: transparent;
-    bottom: 0;
-    color: transparent;
-    cursor: pointer;
-    height: auto;
-    left: 0;
-    position: absolute;
-    right: 0;
-    top: 0;
-    width: auto;
   }
 </style>
 </head>
@@ -285,7 +541,6 @@
         <input type="checkbox" id="show-decoded" onchange="toggleDecoded()" style="width:auto;margin:0;" />
         Also show decoded URL
       </label>
-
     </div>
   </div>
 
@@ -294,11 +549,350 @@
     <br><br>
     <strong>Important:</strong> Always verify flights, prices, and availability directly with the airline. URL formats may change without notice, potentially breaking generated links. This tool shows search results only — final bookings must be made through official airline channels. Flight information, prices, and schedules change constantly. No personal data is collected — this tool runs entirely in your browser.
     <br><br>
-    <strong>Legal:</strong> This tool is provided "as-is" without warranties. Use at your own risk. We are not responsible for any booking issues, missed flights, price differences, or other travel-related problems that may arise from using this tool.
+    <strong>Legal:</strong> This tool is provided <i>as-is</i> without warranties. Use at your own risk. We are not responsible for any booking issues, missed flights, price differences, or other travel-related problems that may arise from using this tool.
   </div>
 </div>
 
 <script>
+  /* =========================================
+     CUSTOM DATE PICKER
+     ========================================= */
+  var DatePicker = {
+    MONTHS: ['January','February','March','April','May','June','July','August','September','October','November','December'],
+    DAYS: ['Mo','Tu','We','Th','Fr','Sa','Su'],
+    _openInstance: null,
+
+    create: function(wrapEl) {
+      var input = wrapEl.querySelector('.cp-date-input');
+      var btn   = wrapEl.querySelector('.cp-date-btn');
+      var cal   = wrapEl.querySelector('.cp-cal');
+      var state = { year: 0, month: 0 };
+
+      // Parse current value or default to today
+      function parseVal() {
+        var v = input.value.trim();
+        var m = v.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+        if (m) {
+          state.year  = parseInt(m[1], 10);
+          state.month = parseInt(m[2], 10) - 1;
+        } else {
+          var d = new Date();
+          state.year  = d.getFullYear();
+          state.month = d.getMonth();
+        }
+      }
+
+      function renderCal() {
+        var today    = new Date();
+        var todayStr = today.getFullYear() + '-' + String(today.getMonth()+1).padStart(2,'0') + '-' + String(today.getDate()).padStart(2,'0');
+        var selStr   = input.value.trim();
+
+        var title = DatePicker.MONTHS[state.month] + ' ' + state.year;
+        var first = new Date(state.year, state.month, 1);
+        var start = (first.getDay() + 6) % 7; // Monday = 0
+        var daysInMonth  = new Date(state.year, state.month + 1, 0).getDate();
+        var daysInPrev   = new Date(state.year, state.month, 0).getDate();
+
+        var html = '<div class="cp-cal-header">' +
+          '<button type="button" data-nav="prev">&#9664;</button>' +
+          '<span class="cp-cal-title">' + title + '</span>' +
+          '<button type="button" data-nav="next">&#9654;</button>' +
+          '</div>';
+        html += '<div class="cp-cal-dow">';
+        DatePicker.DAYS.forEach(function(d) { html += '<span>' + d + '</span>'; });
+        html += '</div><div class="cp-cal-grid">';
+
+        // Previous month fill
+        for (var p = start - 1; p >= 0; p--) {
+          var pd = daysInPrev - p;
+          var pm = state.month - 1;
+          var py = state.year;
+          if (pm < 0) { pm = 11; py--; }
+          var pStr = py + '-' + String(pm+1).padStart(2,'0') + '-' + String(pd).padStart(2,'0');
+          html += '<button type="button" class="other-month' + (pStr === selStr ? ' selected' : '') + '" data-date="' + pStr + '">' + pd + '</button>';
+        }
+        // Current month
+        for (var d = 1; d <= daysInMonth; d++) {
+          var dStr = state.year + '-' + String(state.month+1).padStart(2,'0') + '-' + String(d).padStart(2,'0');
+          var cls = '';
+          if (dStr === todayStr) cls += ' today';
+          if (dStr === selStr)   cls += ' selected';
+          html += '<button type="button" class="' + cls.trim() + '" data-date="' + dStr + '">' + d + '</button>';
+        }
+        // Next month fill
+        var totalCells = start + daysInMonth;
+        var remainder  = totalCells % 7;
+        if (remainder > 0) {
+          for (var n = 1; n <= 7 - remainder; n++) {
+            var nm = state.month + 1;
+            var ny = state.year;
+            if (nm > 11) { nm = 0; ny++; }
+            var nStr = ny + '-' + String(nm+1).padStart(2,'0') + '-' + String(n).padStart(2,'0');
+            html += '<button type="button" class="other-month' + (nStr === selStr ? ' selected' : '') + '" data-date="' + nStr + '">' + n + '</button>';
+          }
+        }
+        html += '</div>';
+        cal.innerHTML = html;
+
+        // Wire nav buttons
+        cal.querySelector('[data-nav="prev"]').addEventListener('click', function(e) {
+          e.stopPropagation();
+          state.month--;
+          if (state.month < 0) { state.month = 11; state.year--; }
+          renderCal();
+        });
+        cal.querySelector('[data-nav="next"]').addEventListener('click', function(e) {
+          e.stopPropagation();
+          state.month++;
+          if (state.month > 11) { state.month = 0; state.year++; }
+          renderCal();
+        });
+
+        // Wire day buttons
+        cal.querySelectorAll('.cp-cal-grid button').forEach(function(b) {
+          b.addEventListener('click', function(e) {
+            e.stopPropagation();
+            var dateVal = b.getAttribute('data-date');
+            input.value = dateVal;
+            input.classList.remove('invalid');
+            closeCal();
+            // Fire the callback
+            if (typeof input._onChange === 'function') input._onChange(dateVal);
+          });
+        });
+      }
+
+      function openCal() {
+        // Close any other open picker
+        if (DatePicker._openInstance && DatePicker._openInstance !== closeCal) {
+          DatePicker._openInstance();
+        }
+        TimePicker._closeOpen();
+        parseVal();
+        renderCal();
+        cal.classList.add('open');
+        DatePicker._openInstance = closeCal;
+        positionDropdown(wrapEl, cal);
+      }
+
+      function closeCal() {
+        cal.classList.remove('open');
+        if (DatePicker._openInstance === closeCal) DatePicker._openInstance = null;
+      }
+
+      btn.addEventListener('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        if (cal.classList.contains('open')) closeCal();
+        else openCal();
+      });
+
+      // Validate on blur
+      input.addEventListener('blur', function() {
+        var v = input.value.trim();
+        if (v && !/^\d{4}-\d{2}-\d{2}$/.test(v)) {
+          input.classList.add('invalid');
+        } else {
+          input.classList.remove('invalid');
+          if (typeof input._onChange === 'function') input._onChange(v);
+        }
+      });
+
+      // Also fire on Enter
+      input.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') {
+          input.blur();
+        }
+      });
+
+      // Live input: fire onChange as user types a valid date
+      input.addEventListener('input', function() {
+        var v = input.value.trim();
+        if (/^\d{4}-\d{2}-\d{2}$/.test(v)) {
+          input.classList.remove('invalid');
+          if (typeof input._onChange === 'function') input._onChange(v);
+        }
+      });
+
+      return { open: openCal, close: closeCal };
+    }
+  };
+
+  /* =========================================
+     CUSTOM TIME PICKER
+     ========================================= */
+  var TimePicker = {
+    _openInstance: null,
+
+    _closeOpen: function() {
+      if (TimePicker._openInstance) {
+        TimePicker._openInstance();
+        TimePicker._openInstance = null;
+      }
+    },
+
+    create: function(wrapEl) {
+      var input = wrapEl.querySelector('.cp-time-input');
+      var btn   = wrapEl.querySelector('.cp-time-btn');
+      var drop  = wrapEl.querySelector('.cp-time-drop');
+
+      function renderDrop() {
+        var curH = -1, curM = -1;
+        var m = (input.value || '').match(/^(\d{2}):(\d{2})$/);
+        if (m) { curH = parseInt(m[1], 10); curM = parseInt(m[2], 10); }
+
+        var html = '<div class="cp-time-drop-header"><span>Hour</span><span>Min</span></div>';
+        html += '<div class="cp-time-cols">';
+        // Hours column
+        html += '<div class="cp-time-col" data-col="h">';
+        for (var h = 0; h < 24; h++) {
+          var hs = String(h).padStart(2, '0');
+          html += '<button type="button" data-h="' + hs + '"' + (h === curH ? ' class="selected"' : '') + '>' + hs + '</button>';
+        }
+        html += '</div>';
+        // Minutes column
+        html += '<div class="cp-time-col" data-col="m">';
+        for (var mi = 0; mi < 60; mi += 5) {
+          var ms = String(mi).padStart(2, '0');
+          html += '<button type="button" data-m="' + ms + '"' + (mi === curM ? ' class="selected"' : '') + '>' + ms + '</button>';
+        }
+        html += '</div>';
+        html += '</div>';
+        drop.innerHTML = html;
+
+        // Scroll selected into view
+        setTimeout(function() {
+          drop.querySelectorAll('.cp-time-col').forEach(function(col) {
+            var sel = col.querySelector('.selected');
+            if (sel) sel.scrollIntoView({ block: 'center', behavior: 'instant' });
+          });
+        }, 10);
+
+        // Wire click handlers
+        drop.querySelectorAll('[data-h]').forEach(function(b) {
+          b.addEventListener('click', function(e) {
+            e.stopPropagation();
+            // Deselect others in same column
+            b.parentElement.querySelectorAll('button').forEach(function(x) { x.classList.remove('selected'); });
+            b.classList.add('selected');
+            commitTime();
+          });
+        });
+        drop.querySelectorAll('[data-m]').forEach(function(b) {
+          b.addEventListener('click', function(e) {
+            e.stopPropagation();
+            b.parentElement.querySelectorAll('button').forEach(function(x) { x.classList.remove('selected'); });
+            b.classList.add('selected');
+            commitTime();
+          });
+        });
+      }
+
+      function commitTime() {
+        var hBtn = drop.querySelector('[data-col="h"] .selected');
+        var mBtn = drop.querySelector('[data-col="m"] .selected');
+        if (hBtn && mBtn) {
+          var val = hBtn.getAttribute('data-h') + ':' + mBtn.getAttribute('data-m');
+          input.value = val;
+          input.classList.remove('invalid');
+          if (typeof input._onChange === 'function') input._onChange(val);
+        }
+      }
+
+      function openDrop() {
+        if (DatePicker._openInstance) DatePicker._openInstance();
+        if (TimePicker._openInstance && TimePicker._openInstance !== closeDrop) {
+          TimePicker._openInstance();
+        }
+        renderDrop();
+        drop.classList.add('open');
+        TimePicker._openInstance = closeDrop;
+        positionDropdown(wrapEl, drop);
+      }
+
+      function closeDrop() {
+        drop.classList.remove('open');
+        if (TimePicker._openInstance === closeDrop) TimePicker._openInstance = null;
+      }
+
+      btn.addEventListener('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        if (drop.classList.contains('open')) closeDrop();
+        else openDrop();
+      });
+
+      // Validate on blur
+      input.addEventListener('blur', function() {
+        var v = input.value.trim();
+        if (v && !/^\d{2}:\d{2}$/.test(v)) {
+          input.classList.add('invalid');
+        } else {
+          input.classList.remove('invalid');
+          if (typeof input._onChange === 'function') input._onChange(v);
+        }
+      });
+
+      input.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') input.blur();
+      });
+
+      input.addEventListener('input', function() {
+        var v = input.value.trim();
+        if (/^\d{2}:\d{2}$/.test(v)) {
+          input.classList.remove('invalid');
+          if (typeof input._onChange === 'function') input._onChange(v);
+        }
+      });
+
+      return { open: openDrop, close: closeDrop };
+    }
+  };
+
+  /* =========================================
+     SHARED: position dropdown, close on outside click / Escape
+     ========================================= */
+  function positionDropdown(wrapEl, dropEl) {
+    // Reset to default position
+    dropEl.style.top  = '';
+    dropEl.style.left = '';
+    dropEl.style.right = '';
+
+    // After paint, check if it overflows viewport bottom
+    requestAnimationFrame(function() {
+      var rect = dropEl.getBoundingClientRect();
+      if (rect.bottom > window.innerHeight - 10) {
+        // Open upward
+        dropEl.style.top = 'auto';
+        dropEl.style.bottom = 'calc(100% + 4px)';
+      }
+    });
+  }
+
+  document.addEventListener('click', function(e) {
+    // Close date picker if click outside
+    if (DatePicker._openInstance) {
+      var anyDateWrap = e.target.closest('.cp-date-wrap');
+      if (!anyDateWrap) DatePicker._openInstance();
+    }
+    // Close time picker if click outside
+    if (TimePicker._openInstance) {
+      var anyTimeWrap = e.target.closest('.cp-time-wrap');
+      if (!anyTimeWrap) TimePicker._openInstance();
+    }
+  });
+
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+      if (DatePicker._openInstance) DatePicker._openInstance();
+      if (TimePicker._openInstance) TimePicker._openInstance();
+    }
+  });
+
+
+  /* =========================================
+     ORIGINAL APP LOGIC (updated for custom pickers)
+     ========================================= */
   const DOMAINS = {
     airfrance: ['fr','de','nl','ie','co.uk','us','co.in'],
     klm:       ['nl','de','fr','ie','co.uk','us','co.in'],
@@ -334,7 +928,6 @@
     setAirline('airfrance');
     setTripType('return');
     renderAll();
-
   }
 
   function setAirline(a) {
@@ -409,11 +1002,12 @@
       var lv = i === 0;
       var lbl = function(t) { return lv ? '<label>' + t + '</label>' : '<label style="visibility:hidden">.</label>'; };
       var flightLbl = lv
-        ? '<label>Flight No. <span style="font-weight:normal;color:#bbb;font-size:10px;">e.g. KL1932, AF1</span></label>'
+        ? '<label>Flight No.</label>'
         : '<label style="visibility:hidden">.</label>';
       var removeBtn = arr.length > 1
         ? '<button class="btn-remove" onclick="delSeg(\'' + leg + '\',' + s.id + ')"' + (lv ? ' style="margin-top:19px;"' : '') + '>&#10005;</button>'
         : '<span></span>';
+
       return '<div class="segment" id="seg-' + s.id + '">' +
         '<div class="col-from">' + lbl('From') +
           '<input class="iata" type="text" maxlength="4" placeholder="AMS" value="' + s.from + '"' +
@@ -423,14 +1017,23 @@
           '<input class="iata" type="text" maxlength="4" placeholder="CDG" value="' + s.to + '"' +
           ' oninput="this.value=this.value.toUpperCase();updateSeg(\'' + leg + '\',' + s.id + ',\'to\',this.value);this.classList.remove(\'invalid\');"' +
           ' onkeydown="handleSegKey(event,\'' + leg + '\',' + s.id + ',\'to\')" /></div>' +
+
+        /* Custom Date Picker */
         '<div class="col-date">' + lbl('Date') +
-          '<input type="date" value="' + s.date + '"' +
-          ' oninput="updateSeg(\'' + leg + '\',' + s.id + ',\'date\',this.value);this.classList.remove(\'invalid\');"' +
-          ' onkeydown="handleSegKey(event,\'' + leg + '\',' + s.id + ',\'date\')" /></div>' +
+          '<div class="cp-date-wrap" data-seg-leg="' + leg + '" data-seg-id="' + s.id + '">' +
+            '<input class="cp-date-input" type="text" maxlength="10" placeholder="yyyy-mm-dd" value="' + s.date + '" />' +
+            '<button type="button" class="cp-date-btn" tabindex="-1" title="Open calendar"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="1.5" y="3" width="13" height="11.5" rx="1.5"/><line x1="1.5" y1="7" x2="14.5" y2="7"/><line x1="5" y1="1" x2="5" y2="4.5"/><line x1="11" y1="1" x2="11" y2="4.5"/></svg></button>' +
+            '<div class="cp-cal"></div>' +
+          '</div></div>' +
+
+        /* Custom Time Picker */
         '<div class="col-time">' + lbl('Dep. Time') +
-          '<input type="time" value="' + s.time + '" step="60"' +
-          ' oninput="updateSeg(\'' + leg + '\',' + s.id + ',\'time\',this.value);this.classList.remove(\'invalid\');"' +
-          ' onkeydown="handleSegKey(event,\'' + leg + '\',' + s.id + ',\'time\')" /></div>' +
+          '<div class="cp-time-wrap" data-seg-leg="' + leg + '" data-seg-id="' + s.id + '">' +
+            '<input class="cp-time-input" type="text" maxlength="5" placeholder="hh:mm" value="' + s.time + '" />' +
+            '<button type="button" class="cp-time-btn" tabindex="-1" title="Open time picker"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="6.5"/><line x1="8" y1="4" x2="8" y2="8"/><line x1="8" y1="8" x2="11" y2="10"/></svg></button>' +
+            '<div class="cp-time-drop"></div>' +
+          '</div></div>' +
+
         '<div class="col-flight">' + flightLbl +
           '<input class="flight-no" type="text" maxlength="8" placeholder="AF1341" value="' + s.flight + '"' +
           ' oninput="this.value=this.value.toUpperCase();updateSeg(\'' + leg + '\',' + s.id + ',\'flight\',this.value);this.classList.remove(\'invalid\');"' +
@@ -439,8 +1042,36 @@
         '<div class="col-del" style="display:flex;align-items:flex-end;">' + (lv ? '<label style="visibility:hidden">.</label>' : '') + removeBtn + '</div>' +
         '</div>';
     }).join('');
+
+    // Initialize custom pickers after DOM insertion
+    initPickers(el);
+
     updateBreak();
     updateCounts();
+  }
+
+  function initPickers(container) {
+    // Init date pickers
+    container.querySelectorAll('.cp-date-wrap').forEach(function(wrap) {
+      var leg   = wrap.getAttribute('data-seg-leg');
+      var segid = parseInt(wrap.getAttribute('data-seg-id'), 10);
+      var input = wrap.querySelector('.cp-date-input');
+      input._onChange = function(val) {
+        updateSeg(leg, segid, 'date', val);
+      };
+      DatePicker.create(wrap);
+    });
+
+    // Init time pickers
+    container.querySelectorAll('.cp-time-wrap').forEach(function(wrap) {
+      var leg   = wrap.getAttribute('data-seg-leg');
+      var segid = parseInt(wrap.getAttribute('data-seg-id'), 10);
+      var input = wrap.querySelector('.cp-time-input');
+      input._onChange = function(val) {
+        updateSeg(leg, segid, 'time', val);
+      };
+      TimePicker.create(wrap);
+    });
   }
 
   function updateBreak() {
@@ -519,11 +1150,9 @@
       exp.style.display   = '';
       stat.textContent    = 'URL ready — copy it or open directly in your browser.';
       stat.style.color    = '#2a6a2a';
-      // keep decoded in sync if visible
       if (document.getElementById('show-decoded').checked) {
         document.getElementById('url-decoded').textContent = decodeURIComponent(url);
       }
-
     } else {
       exp.style.display   = 'none';
       stat.textContent    = 'Fill in flight details above, then copy or open the URL.';
@@ -552,8 +1181,6 @@
     var url = buildURL();
     if (url) window.open(url, '_blank');
   }
-
-
 
   function parseItinerary() {
     var raw   = document.getElementById('paste-input').value.trim();
@@ -597,7 +1224,6 @@
   }
 
   init();
-
 </script>
 </body>
 </html>
